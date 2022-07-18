@@ -3,6 +3,6 @@
     <p><%=startingContent%></p>
     <% posts.forEach(function(post){ %>
       <h3><%= post.title %></h3>
-      <p><%= post.body %></p>
+      <p><%= post.body.substring(0,100)%>...<a href="/posts/<%=post.title.replaceAll(" ","-").toLowerCase()%>">Read more</a></p>
     <% }); %>
-<%- include("partials/footer"); -%>")
+<%- include("partials/footer"); -%>
