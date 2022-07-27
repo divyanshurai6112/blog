@@ -1,6 +1,20 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
+const mongoose = require("mongoose");
+const { isBuffer } = require("lodash");
+
+mongoose.connect("mongodb://localhost:27017/blogDB");
+const postSchema = mongoose.Schema({
+  title:{
+    type:String,
+    required:true
+  },
+  content:String
+});
+
+const Post = mongoose.model("Post",postSchema);
+
 
 const homeStartingContent = "Hello there, Welcome to your blog! Here you can post about your daily life or rant about someone who annoyed you. Do whatever you want with it :P";
 const contactContent = "Contact me by clicking the following links :-)";
@@ -12,10 +26,16 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded());
 app.use(express.static("public"));
 
-const posts = [];
+
 
 app.get("/",(req,res)=>{
-  res.render("home",{startingContent:homeStartingContent, posts:posts});
+  Post.find({},function(err,postsFound){
+    if (postsFound.length > 0){
+      res.render("home",{startingContent:homeStartingContent, posts:postsFound});
+    }else{
+      res.render("home",{startingContent:homeStartingContent, posts:postsFound});
+    }
+  });
 });
 
 
@@ -32,25 +52,36 @@ app.get("/compose",function(req,res){
 });
 
 app.post("/compose",function(req,res){
-  let post = {
+  let latestPost = Post.create({
     title : req.body.postTitle,
-    body : req.body.postBody
-  };
-  posts.push(post);
+    content : req.body.postBody
+  });
+  
   res.redirect("/");
 });
 
 
 app.get("/posts/:topic",function(req,res){
   let urlpostName = req.params.topic.replaceAll("-"," ").toLowerCase();
-  posts.forEach(function(post){
-    if (post.title.toLowerCase()===urlpostName){
-      //console.log("matchfound")
-      res.render("post",{titleName:post.title,content:post.body})
+  Post.find({},function(err,postsFoundArray){
+    for (let i =0;i<postsFoundArray.length;i++){
+      if (postsFoundArray[i].title.toLowerCase()===urlpostName){
+        console.log("matchfound");
+        res.render("post",{titleName:postsFoundArray[i].title,content:postsFoundArray[i].content})
+      }
     }
-  });
+  })
 });
 
+app.post("/delete",function(req,res){
+  let query = req.body.checkBox;
+  Post.findByIdAndRemove(query,function(err){
+    if(err){
+      console.log(err)
+    }
+    res.redirect("/");
+  })
+})
 
 
 app.listen(3000, function() {

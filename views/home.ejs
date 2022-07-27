@@ -1,8 +1,12 @@
 <%- include("partials/header"); -%>
     <h1>Home</h1>
     <p><%=startingContent%></p>
-    <% posts.forEach(function(post){ %>
-      <h3><%= post.title %></h3>
-      <p><%= post.body.substring(0,100)%>...<a href="/posts/<%=post.title.replaceAll(" ","-").toLowerCase()%>">Read more</a></p>
-    <% }); %>
+    <% for(let i =0;i<posts.length;i++){ %>
+    <form action="/delete" method = "post">
+      <div>
+        <input type="checkbox" name="checkBox" value="<%= posts[i]._id %>" onchange="this.form.submit()"><h3> - <%= posts[i].title %></h3>
+      </div>
+      <p><%= posts[i].content.substring(0,100)%>...<a href="/posts/<%=posts[i].title.replaceAll(" ","-").toLowerCase()%>">Read more</a></p>
+    <% } %>
+  </form>
 <%- include("partials/footer"); -%>
